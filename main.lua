@@ -1,5 +1,3 @@
--- Fly GUI Script by Xzonee_001
-
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -8,125 +6,142 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local root = character:WaitForChild("HumanoidRootPart")
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FlyController"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
-
-local header = Instance.new("TextLabel")
-header.Size = UDim2.new(0, 300, 0, 30)
-header.Position = UDim2.new(0.5, -150, 0, 20)
-header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-header.TextColor3 = Color3.fromRGB(255, 255, 255)
-header.Text = "Fly Script by Xzonee_001"
-header.Font = Enum.Font.SourceSansBold
-header.TextSize = 18
-header.Parent = screenGui
-
-local flyButton = Instance.new("TextButton")
-flyButton.Size = UDim2.new(0, 100, 0, 40)
-flyButton.Position = UDim2.new(0.5, -150, 0, 60)
-flyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.Text = "Fly: OFF"
-flyButton.Font = Enum.Font.SourceSansBold
-flyButton.TextSize = 16
-flyButton.Parent = screenGui
-
-local noclipButton = Instance.new("TextButton")
-noclipButton.Size = UDim2.new(0, 100, 0, 40)
-noclipButton.Position = UDim2.new(0.5, -30, 0, 60)
-noclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-noclipButton.Text = "AntiClip: OFF"
-noclipButton.Font = Enum.Font.SourceSansBold
-noclipButton.TextSize = 16
-noclipButton.Parent = screenGui
-
-local speedBox = Instance.new("TextBox")
-speedBox.Size = UDim2.new(0, 100, 0, 40)
-speedBox.Position = UDim2.new(0.5, 90, 0, 60)
-speedBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedBox.Text = "50"
-speedBox.PlaceholderText = "Speed"
-speedBox.Font = Enum.Font.SourceSansBold
-speedBox.TextSize = 16
-speedBox.Parent = screenGui
-
-local flyEnabled = false
-local noclipEnabled = false
+local flying = false
+local anticlip = false
 local flySpeed = 50
 local keysDown = {}
 
-flyButton.MouseButton1Click:Connect(function()
-	flyEnabled = not flyEnabled
-	flyButton.Text = "Fly: " .. (flyEnabled and "ON" or "OFF")
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "FlyGUI"
+
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 220, 0, 130)
+frame.Position = UDim2.new(0.05, 0, 0.2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+local header = Instance.new("TextLabel", frame)
+header.Size = UDim2.new(1, 0, 0, 25)
+header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+header.Text = "Fly Menu - Xzonee_001"
+header.TextColor3 = Color3.new(1,1,1)
+header.Font = Enum.Font.SourceSansBold
+header.TextSize = 14
+
+local minimizeBtn = Instance.new("TextButton", frame)
+minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
+minimizeBtn.Position = UDim2.new(1, -50, 0, 0)
+minimizeBtn.Text = "-"
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+minimizeBtn.TextColor3 = Color3.new(1,1,1)
+
+local closeBtn = Instance.new("TextButton", frame)
+closeBtn.Size = UDim2.new(0, 25, 0, 25)
+closeBtn.Position = UDim2.new(1, -25, 0, 0)
+closeBtn.Text = "X"
+closeBtn.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+closeBtn.TextColor3 = Color3.new(1,1,1)
+
+local flyBtn = Instance.new("TextButton", frame)
+flyBtn.Size = UDim2.new(0, 90, 0, 25)
+flyBtn.Position = UDim2.new(0, 10, 0, 40)
+flyBtn.Text = "Fly: OFF"
+flyBtn.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+flyBtn.TextColor3 = Color3.new(1,1,1)
+
+local clipBtn = Instance.new("TextButton", frame)
+clipBtn.Size = UDim2.new(0, 90, 0, 25)
+clipBtn.Position = UDim2.new(0, 120, 0, 40)
+clipBtn.Text = "AntiClip: OFF"
+clipBtn.BackgroundColor3 = Color3.fromRGB(170, 50, 50)
+clipBtn.TextColor3 = Color3.new(1,1,1)
+
+local speedBox = Instance.new("TextBox", frame)
+speedBox.Size = UDim2.new(0, 200, 0, 25)
+speedBox.Position = UDim2.new(0, 10, 0, 80)
+speedBox.Text = tostring(flySpeed)
+speedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+speedBox.TextColor3 = Color3.new(1,1,1)
+speedBox.ClearTextOnFocus = false
+
+flyBtn.MouseButton1Click:Connect(function()
+    flying = not flying
+    if flying then
+        flyBtn.Text = "Fly: ON"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(50,170,50)
+    else
+        flyBtn.Text = "Fly: OFF"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(170,50,50)
+        root.Velocity = Vector3.zero
+    end
 end)
 
-noclipButton.MouseButton1Click:Connect(function()
-	noclipEnabled = not noclipEnabled
-	noclipButton.Text = "AntiClip: " .. (noclipEnabled and "ON" or "OFF")
+clipBtn.MouseButton1Click:Connect(function()
+    anticlip = not anticlip
+    if anticlip then
+        clipBtn.Text = "AntiClip: ON"
+        clipBtn.BackgroundColor3 = Color3.fromRGB(50,170,50)
+    else
+        clipBtn.Text = "AntiClip: OFF"
+        clipBtn.BackgroundColor3 = Color3.fromRGB(170,50,50)
+    end
 end)
 
 speedBox.FocusLost:Connect(function()
-	local newSpeed = tonumber(speedBox.Text)
-	if newSpeed and newSpeed > 0 then
-		flySpeed = newSpeed
-	else
-		speedBox.Text = tostring(flySpeed)
-	end
+    local val = tonumber(speedBox.Text)
+    if val then flySpeed = val end
 end)
 
-UserInputService.InputBegan:Connect(function(input, gp)
-	if gp then return end
-	if input.UserInputType == Enum.UserInputType.Keyboard then
-		keysDown[input.KeyCode] = true
-	end
+local minimized = false
+minimizeBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    for _, obj in ipairs(frame:GetChildren()) do
+        if obj ~= header and obj ~= minimizeBtn and obj ~= closeBtn then
+            obj.Visible = not minimized
+        end
+    end
 end)
 
-UserInputService.InputEnded:Connect(function(input, gp)
-	if gp then return end
-	if input.UserInputType == Enum.UserInputType.Keyboard then
-		keysDown[input.KeyCode] = false
-	end
+closeBtn.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+UserInputService.InputBegan:Connect(function(input,gp)
+    if gp then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        keysDown[input.KeyCode] = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input,gp)
+    if gp then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        keysDown[input.KeyCode] = false
+    end
 end)
 
 RunService.RenderStepped:Connect(function()
-	if flyEnabled and root then
-		local camera = workspace.CurrentCamera
-		local forward = camera.CFrame.LookVector
-		local right = camera.CFrame.RightVector
-		local up = Vector3.new(0,1,0)
+    if not flying or not root then return end
+    local camera = workspace.CurrentCamera
+    local move = Vector3.zero
+    if keysDown[Enum.KeyCode.W] then move += camera.CFrame.LookVector end
+    if keysDown[Enum.KeyCode.S] then move -= camera.CFrame.LookVector end
+    if keysDown[Enum.KeyCode.A] then move -= camera.CFrame.RightVector end
+    if keysDown[Enum.KeyCode.D] then move += camera.CFrame.RightVector end
+    if keysDown[Enum.KeyCode.Space] then move += Vector3.new(0,1,0) end
+    if keysDown[Enum.KeyCode.LeftShift] then move -= Vector3.new(0,1,0) end
+    if move.Magnitude > 0 then move = move.Unit * flySpeed end
+    root.Velocity = move
+end)
 
-		local moveDirection = Vector3.zero
-		if keysDown[Enum.KeyCode.W] then moveDirection += forward end
-		if keysDown[Enum.KeyCode.S] then moveDirection -= forward end
-		if keysDown[Enum.KeyCode.A] then moveDirection -= right end
-		if keysDown[Enum.KeyCode.D] then moveDirection += right end
-		if keysDown[Enum.KeyCode.Space] then moveDirection += up end
-		if keysDown[Enum.KeyCode.LeftShift] then moveDirection -= up end
-
-		if moveDirection.Magnitude > 0 then
-			moveDirection = moveDirection.Unit
-		end
-
-		root.Velocity = moveDirection * flySpeed
-	else
-		root.Velocity = Vector3.zero
-	end
-
-	if noclipEnabled and character then
-		for _, part in pairs(character:GetDescendants()) do
-			if part:IsA("BasePart") and part.CanCollide then
-				part.CanCollide = false
-			end
-		end
-	else
-		for _, part in pairs(character:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = true
-			end
-		end
-	end
+RunService.Stepped:Connect(function()
+    if anticlip and character then
+        for _,part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
 end)
