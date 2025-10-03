@@ -1,5 +1,5 @@
--- Fly GUI Script (LocalScript)
--- Taruh di StarterPlayerScripts
+-- Fly GUI Clean Version
+-- By Agus (dibersihkan & diperbaiki)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -7,170 +7,153 @@ local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local root = character:WaitForChild("HumanoidRootPart")
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- GUI utama
-local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-ScreenGui.ResetOnSpawn = false
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 200, 0, 130)
-MainFrame.Position = UDim2.new(0.35, 0, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
-
-local Header = Instance.new("TextLabel", MainFrame)
-Header.Size = UDim2.new(1, 0, 0, 25)
-Header.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Header.Text = "Fly Script by Xzonee_001"
-Header.TextColor3 = Color3.fromRGB(255,255,255)
-Header.Font = Enum.Font.SourceSansBold
-Header.TextSize = 14
-
--- Tombol minimize
-local Minimize = Instance.new("TextButton", Header)
-Minimize.Size = UDim2.new(0, 25, 0, 25)
-Minimize.Position = UDim2.new(1, -25, 0, 0)
-Minimize.Text = "-"
-Minimize.TextColor3 = Color3.new(1,1,1)
-Minimize.BackgroundColor3 = Color3.fromRGB(200,0,0)
-
--- Bulatan restore
-local RestoreBtn = Instance.new("TextButton")
-RestoreBtn.Size = UDim2.new(0, 40, 0, 40)
-RestoreBtn.Position = UDim2.new(0.5, -20, 0.1, 0)
-RestoreBtn.Text = "X"
-RestoreBtn.Font = Enum.Font.SourceSansBold
-RestoreBtn.TextSize = 20
-RestoreBtn.TextColor3 = Color3.fromRGB(255,255,255)
-RestoreBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
-RestoreBtn.Visible = false
-RestoreBtn.Parent = ScreenGui
-RestoreBtn.Active = true
-RestoreBtn.Draggable = true
-
--- Rounded corner untuk bulatan
-local corner = Instance.new("UICorner", RestoreBtn)
-corner.CornerRadius = UDim.new(1,0)
-
-Minimize.MouseButton1Click:Connect(function()
-	MainFrame.Visible = false
-	RestoreBtn.Visible = true
-end)
-
-RestoreBtn.MouseButton1Click:Connect(function()
-	MainFrame.Visible = true
-	RestoreBtn.Visible = false
-end)
-
--- Tombol toggle Fly
-local ToggleFly = Instance.new("TextButton", MainFrame)
-ToggleFly.Size = UDim2.new(0.5, -5, 0, 30)
-ToggleFly.Position = UDim2.new(0, 5, 0, 35)
-ToggleFly.Text = "Fly: OFF"
-ToggleFly.BackgroundColor3 = Color3.fromRGB(200,0,0)
-ToggleFly.TextColor3 = Color3.new(1,1,1)
-
--- Speed box
-local SpeedBox = Instance.new("TextBox", MainFrame)
-SpeedBox.Size = UDim2.new(0.5, -5, 0, 30)
-SpeedBox.Position = UDim2.new(0.5, 0, 0, 35)
-SpeedBox.PlaceholderText = "Speed"
-SpeedBox.Text = "50"
-SpeedBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-SpeedBox.TextColor3 = Color3.new(1,1,1)
-
--- Toggle NoClip
-local NoClipBtn = Instance.new("TextButton", MainFrame)
-NoClipBtn.Size = UDim2.new(1, -10, 0, 30)
-NoClipBtn.Position = UDim2.new(0, 5, 0, 75)
-NoClipBtn.Text = "NoClip: OFF"
-NoClipBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
-NoClipBtn.TextColor3 = Color3.new(1,1,1)
-
--- Logic
+-- Vars
 local flying = false
-local noclip = false
 local flySpeed = 50
-local keysDown = {}
+local bodyGyro, bodyVelocity
 
--- Input listener
-UserInputService.InputBegan:Connect(function(input, gp)
-	if gp then return end
-	if input.UserInputType == Enum.UserInputType.Keyboard then
-		keysDown[input.KeyCode] = true
-	end
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FlyGui"
+screenGui.Parent = game.CoreGui
+
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 120)
+mainFrame.Position = UDim2.new(0.35, 0, 0.3, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+-- Title Bar
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -40, 0, 25)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(45,45,45)
+title.Text = "🚀 Fly Menu"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 16
+title.Parent = mainFrame
+
+-- Minimize Button
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
+minimizeBtn.Position = UDim2.new(1, -25, 0, 0)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+minimizeBtn.Text = "-"
+minimizeBtn.TextColor3 = Color3.new(1,1,1)
+minimizeBtn.Font = Enum.Font.SourceSansBold
+minimizeBtn.TextSize = 18
+minimizeBtn.Parent = mainFrame
+
+-- Fly Toggle Button
+local flyButton = Instance.new("TextButton")
+flyButton.Size = UDim2.new(0, 200, 0, 40)
+flyButton.Position = UDim2.new(0, 10, 0, 35)
+flyButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+flyButton.Text = "Fly: OFF"
+flyButton.TextColor3 = Color3.new(1,1,1)
+flyButton.Font = Enum.Font.SourceSansBold
+flyButton.TextSize = 18
+flyButton.Parent = mainFrame
+
+-- Speed Slider (simple version, + and - buttons)
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(0, 200, 0, 20)
+speedLabel.Position = UDim2.new(0, 10, 0, 80)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "Speed: "..flySpeed
+speedLabel.TextColor3 = Color3.new(1,1,1)
+speedLabel.Font = Enum.Font.SourceSans
+speedLabel.TextSize = 16
+speedLabel.Parent = mainFrame
+
+-- Fly Function
+local function startFly()
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.P = 9e4
+    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bodyGyro.CFrame = humanoidRootPart.CFrame
+    bodyGyro.Parent = humanoidRootPart
+
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.zero
+    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    bodyVelocity.Parent = humanoidRootPart
+
+    RunService.RenderStepped:Connect(function()
+        if flying then
+            local camCF = workspace.CurrentCamera.CFrame
+            bodyGyro.CFrame = camCF
+
+            local move = Vector3.zero
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                move = move + camCF.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                move = move - camCF.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                move = move - camCF.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                move = move + camCF.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                move = move + Vector3.new(0,1,0)
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                move = move - Vector3.new(0,1,0)
+            end
+            bodyVelocity.Velocity = move.Unit * flySpeed
+        end
+    end)
+end
+
+local function stopFly()
+    if bodyGyro then bodyGyro:Destroy() end
+    if bodyVelocity then bodyVelocity:Destroy() end
+end
+
+-- Toggle Fly Button
+flyButton.MouseButton1Click:Connect(function()
+    flying = not flying
+    if flying then
+        flyButton.Text = "Fly: ON"
+        flyButton.BackgroundColor3 = Color3.fromRGB(0,200,0)
+        startFly()
+    else
+        flyButton.Text = "Fly: OFF"
+        flyButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+        stopFly()
+    end
 end)
 
-UserInputService.InputEnded:Connect(function(input, gp)
-	if gp then return end
-	if input.UserInputType == Enum.UserInputType.Keyboard then
-		keysDown[input.KeyCode] = false
-	end
-end)
-
--- Toggle Fly
-ToggleFly.MouseButton1Click:Connect(function()
-	flying = not flying
-	if flying then
-		ToggleFly.Text = "Fly: ON"
-		ToggleFly.BackgroundColor3 = Color3.fromRGB(0,200,0)
-	else
-		ToggleFly.Text = "Fly: OFF"
-		ToggleFly.BackgroundColor3 = Color3.fromRGB(200,0,0)
-		root.AssemblyLinearVelocity = Vector3.zero
-	end
-end)
-
--- Toggle NoClip
-NoClipBtn.MouseButton1Click:Connect(function()
-	noclip = not noclip
-	if noclip then
-		NoClipBtn.Text = "NoClip: ON"
-		NoClipBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
-	else
-		NoClipBtn.Text = "NoClip: OFF"
-		NoClipBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
-	end
-end)
-
--- Loop update
-RunService.RenderStepped:Connect(function()
-	if flying then
-		-- Speed update
-		local spd = tonumber(SpeedBox.Text)
-		if spd then flySpeed = spd end
-
-		local cam = workspace.CurrentCamera
-		local forward = cam.CFrame.LookVector
-		local right = cam.CFrame.RightVector
-		local up = Vector3.new(0,1,0)
-
-		local moveDir = Vector3.zero
-		if keysDown[Enum.KeyCode.W] then moveDir += forward end
-		if keysDown[Enum.KeyCode.S] then moveDir -= forward end
-		if keysDown[Enum.KeyCode.A] then moveDir -= right end
-		if keysDown[Enum.KeyCode.D] then moveDir += right end
-		if keysDown[Enum.KeyCode.Space] then moveDir += up end
-		if keysDown[Enum.KeyCode.LeftShift] then moveDir -= up end
-
-		if moveDir.Magnitude > 0 then
-			moveDir = moveDir.Unit * flySpeed
-		else
-			moveDir = Vector3.zero
-		end
-
-		root.AssemblyLinearVelocity = moveDir
-	end
-
-	-- NoClip logic
-	if noclip and character then
-		for _, part in ipairs(character:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
-		end
-	end
+-- Minimize
+local minimized = false
+local miniBtn
+minimizeBtn.MouseButton1Click:Connect(function()
+    if not minimized then
+        mainFrame.Visible = false
+        miniBtn = Instance.new("TextButton")
+        miniBtn.Size = UDim2.new(0,40,0,40)
+        miniBtn.Position = UDim2.new(0.05,0,0.5,0)
+        miniBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+        miniBtn.Text = "X"
+        miniBtn.TextColor3 = Color3.new(1,1,1)
+        miniBtn.Font = Enum.Font.SourceSansBold
+        miniBtn.TextSize = 20
+        miniBtn.Parent = screenGui
+        miniBtn.MouseButton1Click:Connect(function()
+            mainFrame.Visible = true
+            miniBtn:Destroy()
+            minimized = false
+        end)
+        minimized = true
+    end
 end)
