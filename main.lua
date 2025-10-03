@@ -1,18 +1,17 @@
--- Fly GUI Final Version
--- Dibersihkan + Fungsi Lengkap (Draggable, Minimize Bulat X, Close, Fly stabil)
+-- Fly GUI Final Fixed Version
+-- Fitur: Draggable, Minimize bulat X, Close, Fly stabil, Speed berfungsi
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
-local humanoid = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
 
 -- Vars
 local flying = false
 local speed = 1
-local ctrl = {f=0,b=0,l=0,r=0}
-local lastctrl = {f=0,b=0,l=0,r=0}
+local ctrl = {f=0,b=0,l=0,r=0,u=0,d=0}
 local bv, bg
 local frame, miniBtn
 
@@ -100,41 +99,36 @@ minusBtn.Text = "-"
 minusBtn.TextColor3 = Color3.new(1,1,1)
 minusBtn.Parent = frame
 
--- Fly Function
+-- Fly Function (versi stabil)
+local flyConn
 local function startFly()
-    local torso = char:FindFirstChild("HumanoidRootPart")
-    bg = Instance.new("BodyGyro", torso)
+    bg = Instance.new("BodyGyro", hrp)
     bg.P = 9e4
     bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
-    bg.CFrame = torso.CFrame
-    bv = Instance.new("BodyVelocity", torso)
+    bg.CFrame = hrp.CFrame
+
+    bv = Instance.new("BodyVelocity", hrp)
     bv.MaxForce = Vector3.new(9e9,9e9,9e9)
     bv.Velocity = Vector3.zero
 
-    RunService.RenderStepped:Connect(function()
+    flyConn = RunService.RenderStepped:Connect(function()
         if flying then
             bg.CFrame = workspace.CurrentCamera.CFrame
-            local vel = Vector3.new()
-            if ctrl.l+ctrl.r ~= 0 or ctrl.f+ctrl.b ~= 0 then
-                vel = ((workspace.CurrentCamera.CFrame.LookVector * (ctrl.f+ctrl.b)) +
-                    ((workspace.CurrentCamera.CFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) -
-                    workspace.CurrentCamera.CFrame.p))
-                vel = vel * speed
-                lastctrl = {f=ctrl.f,b=ctrl.b,l=ctrl.l,r=ctrl.r}
-            elseif lastctrl.f+lastctrl.b ~= 0 or lastctrl.l+lastctrl.r ~= 0 then
-                vel = ((workspace.CurrentCamera.CFrame.LookVector * (lastctrl.f+lastctrl.b)) +
-                    ((workspace.CurrentCamera.CFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) -
-                    workspace.CurrentCamera.CFrame.p))
-                vel = vel * speed
+            local moveDir = Vector3.new(ctrl.l+ctrl.r, ctrl.u+ctrl.d, ctrl.f+ctrl.b)
+            if moveDir.Magnitude > 0 then
+                moveDir = (workspace.CurrentCamera.CFrame:VectorToWorldSpace(moveDir)).Unit * speed * 5
+            else
+                moveDir = Vector3.zero
             end
-            bv.Velocity = vel
+            bv.Velocity = moveDir
         else
-            if bv then bv.Velocity = Vector3.zero end
+            bv.Velocity = Vector3.zero
         end
     end)
 end
 
 local function stopFly()
+    if flyConn then flyConn:Disconnect() end
     if bg then bg:Destroy() end
     if bv then bv:Destroy() end
 end
@@ -172,8 +166,8 @@ UIS.InputBegan:Connect(function(i, g)
     if i.KeyCode == Enum.KeyCode.S then ctrl.b = -1 end
     if i.KeyCode == Enum.KeyCode.A then ctrl.l = -1 end
     if i.KeyCode == Enum.KeyCode.D then ctrl.r = 1 end
-    if i.KeyCode == Enum.KeyCode.Space then ctrl.f = ctrl.f+1 end
-    if i.KeyCode == Enum.KeyCode.LeftShift then ctrl.b = ctrl.b-1 end
+    if i.KeyCode == Enum.KeyCode.Space then ctrl.u = 1 end
+    if i.KeyCode == Enum.KeyCode.LeftShift then ctrl.d = -1 end
 end)
 
 UIS.InputEnded:Connect(function(i, g)
@@ -182,8 +176,8 @@ UIS.InputEnded:Connect(function(i, g)
     if i.KeyCode == Enum.KeyCode.S then ctrl.b = 0 end
     if i.KeyCode == Enum.KeyCode.A then ctrl.l = 0 end
     if i.KeyCode == Enum.KeyCode.D then ctrl.r = 0 end
-    if i.KeyCode == Enum.KeyCode.Space then ctrl.f = ctrl.f-1 end
-    if i.KeyCode == Enum.KeyCode.LeftShift then ctrl.b = ctrl.b+1 end
+    if i.KeyCode == Enum.KeyCode.Space then ctrl.u = 0 end
+    if i.KeyCode == Enum.KeyCode.LeftShift then ctrl.d = 0 end
 end)
 
 -- Minimize system (bulatan X)
