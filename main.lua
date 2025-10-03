@@ -1,5 +1,5 @@
--- Fly GUI Final Fixed Version
--- Fitur: Draggable, Minimize bulat X, Close, Fly stabil, Speed berfungsi
+-- Fly GUI Final Smooth Version
+-- By Agus (custom fix)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -7,12 +7,13 @@ local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
+local humanoid = char:WaitForChild("Humanoid")
 
 -- Vars
 local flying = false
-local speed = 1
+local speed = 2
 local ctrl = {f=0,b=0,l=0,r=0,u=0,d=0}
-local bv, bg
+local bv, bg, flyConn
 local frame, miniBtn
 
 -- ScreenGui
@@ -99,9 +100,10 @@ minusBtn.Text = "-"
 minusBtn.TextColor3 = Color3.new(1,1,1)
 minusBtn.Parent = frame
 
--- Fly Function (versi stabil)
-local flyConn
+-- Fly Function (smooth & stabil)
 local function startFly()
+    humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+
     bg = Instance.new("BodyGyro", hrp)
     bg.P = 9e4
     bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
@@ -114,13 +116,16 @@ local function startFly()
     flyConn = RunService.RenderStepped:Connect(function()
         if flying then
             bg.CFrame = workspace.CurrentCamera.CFrame
+
             local moveDir = Vector3.new(ctrl.l+ctrl.r, ctrl.u+ctrl.d, ctrl.f+ctrl.b)
+
             if moveDir.Magnitude > 0 then
                 moveDir = (workspace.CurrentCamera.CFrame:VectorToWorldSpace(moveDir)).Unit * speed * 5
             else
                 moveDir = Vector3.zero
             end
-            bv.Velocity = moveDir
+
+            bv.Velocity = bv.Velocity:Lerp(moveDir, 0.25)
         else
             bv.Velocity = Vector3.zero
         end
@@ -128,9 +133,9 @@ local function startFly()
 end
 
 local function stopFly()
-    if flyConn then flyConn:Disconnect() end
     if bg then bg:Destroy() end
     if bv then bv:Destroy() end
+    if flyConn then flyConn:Disconnect() end
 end
 
 -- Toggle fly
