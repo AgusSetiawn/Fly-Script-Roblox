@@ -1,4 +1,4 @@
---// Fly GUI Script (LocalScript)
+--// Fly GUI Script by Xzonee_001
 -- Taruh di StarterPlayerScripts
 
 local Players = game:GetService("Players")
@@ -9,48 +9,57 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local root = character:WaitForChild("HumanoidRootPart")
 
--- Buat GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = player:WaitForChild("PlayerGui")
+-- GUI utama
+local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+ScreenGui.ResetOnSpawn = false
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 200, 0, 120)
 MainFrame.Position = UDim2.new(0.35, 0, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
-MainFrame.Visible = true
 
--- Header
-local Header = Instance.new("TextLabel")
+local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 25)
-Header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Header.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Header.Text = "Fly Script by Xzonee_001"
-Header.TextColor3 = Color3.fromRGB(255, 255, 255)
+Header.TextColor3 = Color3.fromRGB(255,255,255)
 Header.Font = Enum.Font.SourceSansBold
 Header.TextSize = 14
-Header.Parent = MainFrame
 
 -- Tombol minimize
-local Minimize = Instance.new("TextButton")
+local Minimize = Instance.new("TextButton", Header)
 Minimize.Size = UDim2.new(0, 25, 0, 25)
 Minimize.Position = UDim2.new(1, -25, 0, 0)
-Minimize.Text = "_"
-Minimize.TextColor3 = Color3.fromRGB(255,255,255)
-Minimize.BackgroundColor3 = Color3.fromRGB(100,0,0)
-Minimize.Parent = Header
+Minimize.Text = "-"
+Minimize.TextColor3 = Color3.new(1,1,1)
+Minimize.BackgroundColor3 = Color3.fromRGB(200,0,0)
 
 -- Bulatan restore
-local RestoreBtn = Instance.new("TextButton")
+local RestoreBtn = Instance.new("TextButton", ScreenGui)
 RestoreBtn.Size = UDim2.new(0, 40, 0, 40)
 RestoreBtn.Position = UDim2.new(0.5, -20, 0.1, 0)
 RestoreBtn.Text = "X"
-RestoreBtn.TextSize = 18
-RestoreBtn.TextColor3 = Color3.fromRGB(255,255,255)
+RestoreBtn.TextSize = 20
+RestoreBtn.Font = Enum.Font.SourceSansBold
+RestoreBtn.TextColor3 = Color3.new(1,1,1)
 RestoreBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
 RestoreBtn.Visible = false
-RestoreBtn.Parent = ScreenGui
+RestoreBtn.Active = true
+RestoreBtn.Draggable = true
+RestoreBtn.AutoButtonColor = true
+RestoreBtn.TextScaled = true
+RestoreBtn.ClipsDescendants = true
+RestoreBtn.BorderSizePixel = 0
+RestoreBtn.TextWrapped = true
+RestoreBtn.TextXAlignment = Enum.TextXAlignment.Center
+RestoreBtn.TextYAlignment = Enum.TextYAlignment.Center
+RestoreBtn.TextStrokeTransparency = 0.5
+RestoreBtn.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+RestoreBtn.UICorner = Instance.new("UICorner", RestoreBtn)
+RestoreBtn.UICorner.CornerRadius = UDim.new(1,0)
 
 Minimize.MouseButton1Click:Connect(function()
 	MainFrame.Visible = false
@@ -62,42 +71,38 @@ RestoreBtn.MouseButton1Click:Connect(function()
 	RestoreBtn.Visible = false
 end)
 
--- Tombol toggle fly
-local ToggleFly = Instance.new("TextButton")
+-- Tombol toggle Fly
+local ToggleFly = Instance.new("TextButton", MainFrame)
 ToggleFly.Size = UDim2.new(0.5, -5, 0, 30)
 ToggleFly.Position = UDim2.new(0, 5, 0, 35)
 ToggleFly.Text = "Fly: OFF"
-ToggleFly.TextColor3 = Color3.fromRGB(255,255,255)
 ToggleFly.BackgroundColor3 = Color3.fromRGB(200,0,0)
-ToggleFly.Parent = MainFrame
+ToggleFly.TextColor3 = Color3.new(1,1,1)
 
--- Speed slider (sederhana pake textbox)
-local SpeedBox = Instance.new("TextBox")
+-- Speed box
+local SpeedBox = Instance.new("TextBox", MainFrame)
 SpeedBox.Size = UDim2.new(0.5, -5, 0, 30)
 SpeedBox.Position = UDim2.new(0.5, 0, 0, 35)
 SpeedBox.PlaceholderText = "Speed"
 SpeedBox.Text = "50"
 SpeedBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-SpeedBox.TextColor3 = Color3.fromRGB(255,255,255)
-SpeedBox.Parent = MainFrame
+SpeedBox.TextColor3 = Color3.new(1,1,1)
 
 -- Toggle NoClip
-local NoClipBtn = Instance.new("TextButton")
+local NoClipBtn = Instance.new("TextButton", MainFrame)
 NoClipBtn.Size = UDim2.new(1, -10, 0, 30)
 NoClipBtn.Position = UDim2.new(0, 5, 0, 75)
 NoClipBtn.Text = "NoClip: OFF"
-NoClipBtn.TextColor3 = Color3.fromRGB(255,255,255)
 NoClipBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
-NoClipBtn.Parent = MainFrame
+NoClipBtn.TextColor3 = Color3.new(1,1,1)
 
--- Fly Logic
+-- Logic
 local flying = false
 local noclip = false
 local flySpeed = 50
 local keysDown = {}
-local bodyVel
 
--- Input key listener
+-- Input listener
 UserInputService.InputBegan:Connect(function(input, gp)
 	if gp then return end
 	if input.UserInputType == Enum.UserInputType.Keyboard then
@@ -118,19 +123,10 @@ ToggleFly.MouseButton1Click:Connect(function()
 	if flying then
 		ToggleFly.Text = "Fly: ON"
 		ToggleFly.BackgroundColor3 = Color3.fromRGB(0,200,0)
-
-		bodyVel = Instance.new("BodyVelocity")
-		bodyVel.MaxForce = Vector3.new(1e5,1e5,1e5)
-		bodyVel.Velocity = Vector3.zero
-		bodyVel.Parent = root
 	else
 		ToggleFly.Text = "Fly: OFF"
 		ToggleFly.BackgroundColor3 = Color3.fromRGB(200,0,0)
-
-		if bodyVel then
-			bodyVel:Destroy()
-			bodyVel = nil
-		end
+		root.AssemblyLinearVelocity = Vector3.zero
 	end
 end)
 
@@ -146,14 +142,13 @@ NoClipBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Update Loop
-RunService.RenderStepped:Connect(function(dt)
-	if flying and bodyVel then
-		-- Update speed dari TextBox
-		local speedVal = tonumber(SpeedBox.Text)
-		if speedVal then flySpeed = speedVal end
+-- Loop update
+RunService.RenderStepped:Connect(function()
+	if flying then
+		-- Speed update
+		local spd = tonumber(SpeedBox.Text)
+		if spd then flySpeed = spd end
 
-		-- Ambil arah kamera
 		local cam = workspace.CurrentCamera
 		local forward = cam.CFrame.LookVector
 		local right = cam.CFrame.RightVector
@@ -168,15 +163,17 @@ RunService.RenderStepped:Connect(function(dt)
 		if keysDown[Enum.KeyCode.LeftShift] then moveDir -= up end
 
 		if moveDir.Magnitude > 0 then
-			moveDir = moveDir.Unit
+			moveDir = moveDir.Unit * flySpeed
+		else
+			moveDir = Vector3.zero
 		end
 
-		bodyVel.Velocity = moveDir * flySpeed
+		root.AssemblyLinearVelocity = moveDir
 	end
 
-	-- Noclip logic
+	-- NoClip logic
 	if noclip and character then
-		for _, part in pairs(character:GetDescendants()) do
+		for _, part in ipairs(character:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
