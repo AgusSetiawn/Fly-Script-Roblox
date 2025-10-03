@@ -1,4 +1,4 @@
---// Fly GUI Script by Xzonee_001
+-- Fly GUI Script (LocalScript)
 -- Taruh di StarterPlayerScripts
 
 local Players = game:GetService("Players")
@@ -14,7 +14,7 @@ local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 ScreenGui.ResetOnSpawn = false
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 200, 0, 120)
+MainFrame.Size = UDim2.new(0, 200, 0, 130)
 MainFrame.Position = UDim2.new(0.35, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.Active = true
@@ -38,28 +38,22 @@ Minimize.TextColor3 = Color3.new(1,1,1)
 Minimize.BackgroundColor3 = Color3.fromRGB(200,0,0)
 
 -- Bulatan restore
-local RestoreBtn = Instance.new("TextButton", ScreenGui)
+local RestoreBtn = Instance.new("TextButton")
 RestoreBtn.Size = UDim2.new(0, 40, 0, 40)
 RestoreBtn.Position = UDim2.new(0.5, -20, 0.1, 0)
 RestoreBtn.Text = "X"
-RestoreBtn.TextSize = 20
 RestoreBtn.Font = Enum.Font.SourceSansBold
-RestoreBtn.TextColor3 = Color3.new(1,1,1)
+RestoreBtn.TextSize = 20
+RestoreBtn.TextColor3 = Color3.fromRGB(255,255,255)
 RestoreBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
 RestoreBtn.Visible = false
+RestoreBtn.Parent = ScreenGui
 RestoreBtn.Active = true
 RestoreBtn.Draggable = true
-RestoreBtn.AutoButtonColor = true
-RestoreBtn.TextScaled = true
-RestoreBtn.ClipsDescendants = true
-RestoreBtn.BorderSizePixel = 0
-RestoreBtn.TextWrapped = true
-RestoreBtn.TextXAlignment = Enum.TextXAlignment.Center
-RestoreBtn.TextYAlignment = Enum.TextYAlignment.Center
-RestoreBtn.TextStrokeTransparency = 0.5
-RestoreBtn.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-RestoreBtn.UICorner = Instance.new("UICorner", RestoreBtn)
-RestoreBtn.UICorner.CornerRadius = UDim.new(1,0)
+
+-- Rounded corner untuk bulatan
+local corner = Instance.new("UICorner", RestoreBtn)
+corner.CornerRadius = UDim.new(1,0)
 
 Minimize.MouseButton1Click:Connect(function()
 	MainFrame.Visible = false
