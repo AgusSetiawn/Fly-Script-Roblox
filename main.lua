@@ -22,7 +22,7 @@ local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 ScreenGui.Name = "FlyGUI"
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0,250,0,150)
+MainFrame.Size = UDim2.new(0, 500, 0, 260)
 MainFrame.Position = UDim2.new(0.35,0,0.3,0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 MainFrame.BorderSizePixel = 0
@@ -38,17 +38,18 @@ corner.CornerRadius = UDim.new(0, 12)
 corner.Parent = MainFrame
 
 local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1,0,0,30)
+Title.Size = UDim2.new(1, -120, 0, 40)
 Title.BackgroundTransparency = 1
 Title.Text = "🚀 Fly Script - Xzonee_001"
 Title.TextColor3 = Color3.fromRGB(200,200,200)
+Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
 
 -- minimize button
 local MinBtn = Instance.new("TextButton", MainFrame)
 MinBtn.Size = UDim2.new(0,25,0,25)
-MinBtn.Position = UDim2.new(1,-55,0,5)
+MinBtn.Position = UDim2.new(1, -90, 0, 10)
 MinBtn.Text = "_"
 MinBtn.TextColor3 = Color3.fromRGB(255,255,255)
 MinBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
@@ -59,7 +60,7 @@ Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(1,0)
 -- close button
 local CloseBtn = Instance.new("TextButton", MainFrame)
 CloseBtn.Size = UDim2.new(0,25,0,25)
-CloseBtn.Position = UDim2.new(1,-30,0,5)
+CloseBtn.Position = UDim2.new(1, -45, 0, 10)
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255,255,255)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(180,40,40)
